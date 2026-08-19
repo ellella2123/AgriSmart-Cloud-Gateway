@@ -50,10 +50,39 @@ What can I assist you with today?`,
     setIsLoading(true);
 
     try {
+      // Gather context
+      let telemetryContext = "Location data unavailable.";
+      let location = "Unknown";
+      
+      try {
+        if (navigator.geolocation) {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+          });
+          const { latitude, longitude } = pos.coords;
+          location = `${latitude}, ${longitude}`;
+          try {
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,precipitation,wind_speed_10m`);
+            const data = await res.json();
+            if (data.current) {
+              telemetryContext = `Live Weather @ Lat ${latitude.toFixed(2)}, Lng ${longitude.toFixed(2)}: Temp ${data.current.temperature_2m}C, Precip ${data.current.precipitation}mm, Wind ${data.current.wind_speed_10m}km/h.`;
+            }
+          } catch (e) {
+            telemetryContext = `Lat ${latitude.toFixed(4)}, Lng ${longitude.toFixed(4)} (Weather API failed)`;
+          }
+        }
+      } catch (e) {
+        console.log("Could not fetch location for chatbot.");
+      }
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({ 
+          messages: newMessages,
+          location,
+          telemetryContext 
+        }),
       });
 
       if (!response.ok) {
@@ -134,28 +163,28 @@ What can I assist you with today?`,
       {/* Floating Chat Container */}
       {isOpen && (
         <div
-          className="w-[420px] max-w-[calc(100vw-32px)] h-[580px] bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-300"
+          className="w-[420px] max-w-[calc(100vw-32px)] h-[580px] bg-white/80 backdrop-blur-2xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-white/60 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-300"
           id="chatbot-container"
         >
           {/* Header */}
-          <div className="bg-emerald-800 px-5 py-4 flex items-center justify-between text-white border-b border-emerald-900/10">
+          <div className="bg-gradient-to-r from-emerald-950 to-emerald-800 px-5 py-4 flex items-center justify-between text-white border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-700/60 rounded-xl border border-emerald-600/30">
-                <Bot size={22} className="text-emerald-200" />
+              <div className="p-2 bg-emerald-700/60 rounded-xl border border-emerald-500/30 shadow-inner">
+                <Bot size={22} className="text-emerald-300 drop-shadow-md" />
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <h3 className="font-semibold text-sm tracking-wide">AgriCompanion AI</h3>
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-950/40 text-[10px] font-medium text-emerald-300 border border-emerald-500/20">
-                    <Sparkles size={8} /> Active
+                  <h3 className="font-bold text-sm tracking-wide text-white drop-shadow-sm">AgriCompanion AI</h3>
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-[10px] font-bold text-emerald-300 border border-emerald-400/30 shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+                    <Sparkles size={8} className="animate-pulse" /> Active
                   </span>
                 </div>
-                <p className="text-[11px] text-emerald-200/80">Agronomy & Credit Readiness Advisor</p>
+                <p className="text-[11px] text-emerald-100/70 font-medium">Agronomy & Credit Readiness Advisor</p>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1.5 hover:bg-emerald-700/50 text-emerald-200 hover:text-white rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 hover:bg-white/10 text-emerald-200 hover:text-white rounded-xl transition-all cursor-pointer backdrop-blur-md"
               id="btn-close-chatbot"
             >
               <X size={18} />
@@ -163,36 +192,36 @@ What can I assist you with today?`,
           </div>
 
           {/* Quick Stats Overlay or Disclaimer */}
-          <div className="bg-emerald-50 px-4 py-2 border-b border-emerald-100/50 text-[11px] text-emerald-800 flex items-center justify-between">
+          <div className="bg-emerald-900/10 backdrop-blur-sm px-4 py-2 border-b border-emerald-500/10 text-[11px] text-emerald-800 flex items-center justify-between font-medium">
             <span>🌍 Search-grounded weather data enabled</span>
-            <span className="font-medium">Powered by Gemini 3.5</span>
+            <span className="bg-emerald-100 text-emerald-700 px-1.5 rounded-sm">Powered by Gemini 3.5</span>
           </div>
 
           {/* Messages Thread */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/30">
             {messages.map((msg, index) => {
               const isAI = msg.role === "model";
               return (
                 <div
                   key={index}
-                  className={`flex ${isAI ? "justify-start" : "justify-end"} items-start gap-2.5`}
+                  className={`flex ${isAI ? "justify-start" : "justify-end"} items-start gap-2.5 animate-in slide-in-from-bottom-2 fade-in duration-300`}
                 >
                   {isAI && (
-                    <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center border border-emerald-200 shrink-0 text-emerald-800 mt-1">
-                      <Bot size={14} />
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center border border-emerald-300 shrink-0 text-emerald-800 mt-1 shadow-sm">
+                      <Bot size={16} />
                     </div>
                   )}
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-xs border ${
+                    className={`max-w-[85%] rounded-[1.25rem] px-4 py-3 shadow-sm border ${
                       isAI
-                        ? "bg-white text-gray-800 border-gray-100 rounded-tl-none"
-                        : "bg-emerald-700 text-white border-emerald-600 rounded-tr-none"
+                        ? "bg-white/90 backdrop-blur-md text-gray-800 border-white/60 rounded-tl-none shadow-[0_2px_15px_rgba(0,0,0,0.03)]"
+                        : "bg-gradient-to-br from-emerald-600 to-emerald-800 text-white border-emerald-500/50 rounded-tr-none shadow-[0_4px_15px_rgba(16,185,129,0.2)]"
                     }`}
                   >
                     {isAI ? (
-                      <div className="space-y-1">{formatMarkdown(msg.content)}</div>
+                      <div className="space-y-2">{formatMarkdown(msg.content)}</div>
                     ) : (
-                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed font-medium">{msg.content}</p>
                     )}
                   </div>
                 </div>
@@ -201,13 +230,13 @@ What can I assist you with today?`,
 
             {/* AI is thinking loader */}
             {isLoading && (
-              <div className="flex justify-start items-start gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center border border-emerald-200 shrink-0 text-emerald-800 mt-1">
-                  <Bot size={14} />
+              <div className="flex justify-start items-start gap-2.5 animate-in fade-in duration-300">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center border border-emerald-300 shrink-0 text-emerald-800 mt-1 shadow-sm">
+                  <Bot size={16} className="animate-pulse" />
                 </div>
-                <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
-                  <Loader2 size={16} className="animate-spin text-emerald-700" />
-                  <span>Thinking & searching web...</span>
+                <div className="bg-white/90 backdrop-blur-md border border-white/60 shadow-[0_2px_15px_rgba(0,0,0,0.03)] rounded-[1.25rem] rounded-tl-none px-4 py-3 text-sm text-gray-500 flex items-center gap-3">
+                  <Loader2 size={16} className="animate-spin text-emerald-600" />
+                  <span className="font-medium animate-pulse">Thinking & searching web...</span>
                 </div>
               </div>
             )}
@@ -216,16 +245,16 @@ What can I assist you with today?`,
 
           {/* Prompt Suggestions */}
           {messages.length === 1 && !isLoading && (
-            <div className="px-4 py-2 bg-white border-t border-gray-100">
-              <p className="text-[11px] font-semibold text-gray-400 mb-2 uppercase tracking-wider">Suggested Topics</p>
-              <div className="flex flex-col gap-1.5">
+            <div className="px-4 py-3 bg-white/60 backdrop-blur-md border-t border-white/40">
+              <p className="text-[10px] font-bold text-gray-400 mb-2.5 uppercase tracking-widest pl-1">Suggested Topics</p>
+              <div className="flex flex-col gap-2">
                 {quickQuestions.map((q, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSendMessage(q.prompt)}
-                    className="flex items-center justify-between text-left text-xs text-gray-700 bg-gray-50 hover:bg-emerald-50 hover:text-emerald-900 border border-gray-100 hover:border-emerald-200 px-3 py-2 rounded-xl transition-all cursor-pointer group"
+                    className="flex items-center justify-between text-left text-xs text-gray-700 bg-white/70 backdrop-blur-md hover:bg-gradient-to-r hover:from-emerald-50 hover:to-white hover:text-emerald-900 border border-gray-100/50 hover:border-emerald-200 shadow-sm hover:shadow-[0_4px_15px_rgba(16,185,129,0.1)] px-3 py-2 rounded-xl transition-all cursor-pointer group"
                   >
-                    <span>{q.text}</span>
+                    <span className="font-medium">{q.text}</span>
                     <ArrowUpRight size={12} className="text-gray-400 group-hover:text-emerald-700 transition-colors" />
                   </button>
                 ))}
@@ -239,14 +268,14 @@ What can I assist you with today?`,
               e.preventDefault();
               handleSendMessage(inputValue);
             }}
-            className="p-3 bg-white border-t border-gray-150 flex gap-2 items-center"
+            className="p-3 bg-white/90 backdrop-blur-xl border-t border-white/60 shadow-[0_-10px_20px_rgba(0,0,0,0.02)] flex gap-2 items-center"
           >
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Ask about crops, soils, loans..."
-              className="flex-1 bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white text-sm px-4 py-2.5 rounded-xl outline-none transition-all placeholder:text-gray-400"
+              className="flex-1 bg-gray-50/80 border border-gray-200/50 focus:border-emerald-500/50 focus:bg-white text-sm px-4 py-2.5 rounded-xl outline-none transition-all placeholder:text-gray-400 shadow-inner font-medium"
               disabled={isLoading}
               id="input-chatbot-message"
             />
@@ -255,12 +284,12 @@ What can I assist you with today?`,
               disabled={!inputValue.trim() || isLoading}
               className={`p-2.5 rounded-xl font-medium flex items-center justify-center transition-all cursor-pointer ${
                 inputValue.trim() && !isLoading
-                  ? "bg-emerald-700 text-white hover:bg-emerald-800"
-                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  ? "bg-gradient-to-br from-emerald-600 to-emerald-800 text-white hover:from-emerald-500 hover:to-emerald-700 shadow-[0_4px_15px_rgba(16,185,129,0.25)] border border-emerald-500/50"
+                  : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200/50"
               }`}
               id="btn-submit-chatbot-message"
             >
-              <Send size={16} />
+              <Send size={16} className={inputValue.trim() && !isLoading ? "drop-shadow-md" : ""} />
             </button>
           </form>
         </div>

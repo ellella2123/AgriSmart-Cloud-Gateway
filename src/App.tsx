@@ -125,106 +125,121 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
-      {/* Top Navigation */}
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-[1400px] mx-auto px-2 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="bg-emerald-600 p-1.5 rounded-lg text-white shadow-sm shadow-emerald-200">
-              <Sprout size={20} />
+    <div className="min-h-screen bg-slate-950 flex flex-col font-sans text-slate-800 relative overflow-hidden">
+      {/* Neon/Glassmorphic Ambient Background */}
+      <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] rounded-full bg-emerald-500/30 blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-teal-500/20 blur-[140px] pointer-events-none" />
+      <div className="absolute top-[30%] left-[50%] w-[30%] h-[30%] rounded-full bg-blue-500/15 blur-[120px] pointer-events-none" />
+      
+      <div className="relative z-10 flex flex-col min-h-screen">
+        {/* Top Navigation */}
+        <nav className="bg-white/80 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+          <div className="max-w-[1400px] mx-auto px-2 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="bg-gradient-to-br from-emerald-400 to-emerald-600 p-1.5 rounded-lg text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+                <Sprout size={20} />
+              </div>
+              <span className="font-black text-lg tracking-tight text-gray-900 hidden lg:inline-block bg-clip-text text-transparent bg-gradient-to-r from-emerald-950 to-teal-800">
+                AgriSmart Ecosystem
+              </span>
             </div>
-            <span className="font-black text-lg tracking-tight text-gray-900 hidden lg:inline-block">AgriSmart Ecosystem</span>
-          </div>
-          
-          <div className="flex-grow overflow-x-auto hide-scrollbar">
-            <div className="flex items-center bg-gray-100 p-1 rounded-xl w-max mx-auto sm:mx-0 gap-1">
-              {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveView(item.id as ViewType)}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
-                    activeView === item.id ? `bg-white shadow-xs ${item.color}` : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
-                  }`}
-                >
-                  <item.icon size={14} className="shrink-0" />
-                  <span>{item.label}</span>
-                </button>
-              ))}
+            
+            <div className="flex-grow overflow-x-auto hide-scrollbar">
+              <div className="flex items-center bg-gray-200/50 backdrop-blur-md p-1 rounded-xl w-max mx-auto sm:mx-0 gap-1 border border-white/40 shadow-inner">
+                {navItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveView(item.id as ViewType)}
+                    className={`relative px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap cursor-pointer hover:bg-white/60 ${
+                      activeView === item.id ? `${item.color}` : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {activeView === item.id && (
+                      <span className="absolute inset-0 bg-white shadow-sm rounded-lg border border-white/50 pointer-events-none"></span>
+                    )}
+                    <item.icon size={14} className="shrink-0 relative z-10" />
+                    <span className="relative z-10">{item.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      {/* Ask AgriCompanion AI Sticky Ribbon - placed permanently just below the icons */}
-      <div className="bg-emerald-800 text-emerald-100 border-b border-emerald-950 sticky top-16 z-30 shadow-xs">
-        <div className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 truncate">
-            <div className="bg-emerald-750 p-1 rounded-md text-emerald-300 animate-pulse shrink-0">
-              <Bot size={14} />
+        {/* Ask AgriCompanion AI Sticky Ribbon */}
+        <div className="bg-emerald-950/90 backdrop-blur-lg border-b border-emerald-500/20 sticky top-16 z-30 shadow-[0_5px_20px_rgba(16,185,129,0.15)]">
+          <div className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 truncate">
+              <div className="bg-emerald-500/20 p-1 rounded-md text-emerald-400 animate-pulse shrink-0 border border-emerald-500/30">
+                <Bot size={14} />
+              </div>
+              <span className="font-medium text-[11px] sm:text-xs truncate text-emerald-100 tracking-wide">
+                <strong className="text-emerald-400 font-bold tracking-wider uppercase text-[10px] mr-1 border border-emerald-500/30 px-1 py-0.5 rounded-sm bg-emerald-500/10">AI Alert</strong>
+                Access FMAFS Renewed Hope fertilizer grants & BOA grain stabilisation plans!
+              </span>
             </div>
-            <span className="font-bold text-[11px] sm:text-xs truncate text-emerald-50">
-              AgriCompanion AI: Access FMAFS Renewed Hope fertilizer grants & BOA grain stabilisation plans!
-            </span>
+            <button
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent("open-agrichatbot"));
+              }}
+              className="shrink-0 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold px-3 py-1.5 rounded-lg text-[10px] sm:text-xs transition-all shadow-[0_0_10px_rgba(16,185,129,0.4)] cursor-pointer flex items-center gap-1.5 border border-emerald-400/50"
+            >
+              <Sparkles size={11} className="shrink-0" />
+              <span>Ask AI</span>
+            </button>
           </div>
-          <button
-            onClick={() => {
-              window.dispatchEvent(new CustomEvent("open-agrichatbot"));
-            }}
-            className="shrink-0 bg-white hover:bg-emerald-50 text-emerald-800 font-extrabold px-3 py-1.5 rounded-lg text-[10px] sm:text-xs transition-all shadow-xs cursor-pointer flex items-center gap-1"
-          >
-            <Sparkles size={11} className="text-emerald-700 shrink-0" />
-            <span>Ask AI</span>
-          </button>
         </div>
+
+        <main className="flex-grow p-2 sm:p-4 lg:p-6 relative z-10">
+          <div className="bg-white/80 backdrop-blur-2xl border border-white/50 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden">
+            {activeView === 'farmer' && (
+              <FarmersDashboard 
+                 onAddListing={handleAddListing} 
+                 certificates={certificates}
+                 onRefreshData={handleRefreshData}
+              />
+            )}
+            
+            {activeView === 'buyer' && (
+              <BuyersMarketplace 
+                 listings={listings}
+                 certificates={certificates}
+                 onContactFarmer={handleContactFarmer}
+              />
+            )}
+            
+            {activeView === 'financial' && (
+              <FinancialServices certificates={certificates} />
+            )}
+            
+            {activeView === 'twin' && (
+              <DigitalTwin certificates={certificates} />
+            )}
+
+            {activeView === 'extension' && (
+              <ExtensionPortal />
+            )}
+
+            {activeView === 'ngo' && (
+              <NgoDashboard />
+            )}
+            
+            {activeView === 'government' && (
+              <GovernmentPortal 
+                 certificates={certificates}
+              />
+            )}
+
+            {activeView === 'schemes' && (
+              <SupportSchemes />
+            )}
+
+            {activeView === 'admin' && (
+              <AdminDashboard />
+            )}
+          </div>
+        </main>
       </div>
-
-      <main className="flex-grow">
-        {activeView === 'farmer' && (
-          <FarmersDashboard 
-             onAddListing={handleAddListing} 
-             certificates={certificates}
-             onRefreshData={handleRefreshData}
-          />
-        )}
-        
-        {activeView === 'buyer' && (
-          <BuyersMarketplace 
-             listings={listings}
-             certificates={certificates}
-             onContactFarmer={handleContactFarmer}
-          />
-        )}
-        
-        {activeView === 'financial' && (
-          <FinancialServices certificates={certificates} />
-        )}
-        
-        {activeView === 'twin' && (
-          <DigitalTwin certificates={certificates} />
-        )}
-
-        {activeView === 'extension' && (
-          <ExtensionPortal />
-        )}
-
-        {activeView === 'ngo' && (
-          <NgoDashboard />
-        )}
-        
-        {activeView === 'government' && (
-          <GovernmentPortal 
-             certificates={certificates}
-          />
-        )}
-
-        {activeView === 'schemes' && (
-          <SupportSchemes />
-        )}
-
-        {activeView === 'admin' && (
-          <AdminDashboard />
-        )}
-      </main>
 
       <AgriChatBot />
     </div>
