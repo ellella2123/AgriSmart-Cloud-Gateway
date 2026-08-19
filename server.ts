@@ -25,7 +25,8 @@ function getGenAI() {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  // Use Cloud Run's PORT environment variable, fallback to 3000 for local dev
+  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
   app.use(express.json({ limit: "50mb" })); // Support larger base64 payloads for image upload
   app.use(express.urlencoded({ limit: "50mb", extended: true }));

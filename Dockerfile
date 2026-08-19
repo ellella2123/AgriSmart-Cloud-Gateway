@@ -26,9 +26,5 @@ RUN npm ci --only=production
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/server.ts ./server.ts
 
-# Cloud Run injects the PORT environment variable (default 8080 or 3000)
-# We expose 3000 to match the local and container binding
-EXPOSE 3000
-
 # Start the compiled CommonJS server bundle
 CMD ["node", "dist/server.cjs"]
