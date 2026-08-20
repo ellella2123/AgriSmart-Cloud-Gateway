@@ -29,27 +29,27 @@ export default function DigitalTwin({ certificates = [] }: DigitalTwinProps) {
   };
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col bg-slate-50 animate-in fade-in duration-500"> 
-      <div className="p-4 sm:p-6 bg-white border-b border-gray-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 z-10">
+    <div className="min-h-[550px] sm:min-h-[650px] h-[calc(100vh-8.5rem)] sm:h-[calc(100vh-7.5rem)] flex flex-col bg-slate-50 animate-in fade-in duration-300 rounded-2xl sm:rounded-3xl overflow-hidden"> 
+      <div className="p-3.5 sm:p-5 bg-white border-b border-gray-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 z-10">
         <div>
-          <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
-            <Globe className="text-blue-600" /> Farm Digital Twin & GIS
+          <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+            <Globe className="text-blue-600 shrink-0" size={22} /> Farm Digital Twin & GIS
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Satellite intelligence, weather simulation, and spatial analysis</p>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Satellite intelligence, weather simulation, and spatial analysis</p>
         </div>
-        <div className="flex gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
-          <button className="px-4 py-1.5 bg-white shadow-sm rounded-lg text-xs font-bold text-slate-800 flex items-center gap-2">
-            <Map size={14}/> Topography
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <button className="px-3 sm:px-4 py-1.5 bg-white shadow-sm rounded-lg text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <Map size={13}/> Topography
           </button>
-          <button className="px-4 py-1.5 text-slate-600 hover:text-slate-900 rounded-lg text-xs font-bold flex items-center gap-2">
-            <Layers size={14}/> NDVI Map
+          <button className="px-3 sm:px-4 py-1.5 text-slate-600 hover:text-slate-900 rounded-lg text-xs font-bold flex items-center gap-1.5">
+            <Layers size={13}/> NDVI Map
           </button>
           <button 
             onClick={runSimulation}
             disabled={isSimulating}
-            className="px-4 py-1.5 text-slate-600 hover:text-slate-900 disabled:opacity-50 rounded-lg text-xs font-bold flex items-center gap-2"
+            className="px-3 sm:px-4 py-1.5 text-slate-600 hover:text-slate-900 disabled:opacity-50 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
           >
-            <Cpu size={14} className={isSimulating ? "animate-spin" : ""} /> {isSimulating ? "Simulating..." : "Run Simulation"}
+            <Cpu size={13} className={isSimulating ? "animate-spin" : ""} /> {isSimulating ? "Simulating..." : "Run Simulation"}
           </button>
         </div>
       </div>

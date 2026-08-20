@@ -133,31 +133,31 @@ function App() {
       
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* Top Navigation */}
-        <nav className="bg-white/80 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
-          <div className="max-w-[1400px] mx-auto px-2 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <nav className="bg-white/85 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+          <div className="max-w-[1500px] mx-auto px-2 sm:px-4 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2 shrink-0">
               <div className="bg-gradient-to-br from-emerald-400 to-emerald-600 p-1.5 rounded-lg text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]">
-                <Sprout size={20} />
+                <Sprout size={18} className="sm:w-5 sm:h-5" />
               </div>
-              <span className="font-black text-lg tracking-tight text-gray-900 hidden lg:inline-block bg-clip-text text-transparent bg-gradient-to-r from-emerald-950 to-teal-800">
+              <span className="font-black text-sm sm:text-base lg:text-lg tracking-tight text-gray-900 hidden md:inline-block bg-clip-text text-transparent bg-gradient-to-r from-emerald-950 to-teal-800">
                 AgriSmart Ecosystem
               </span>
             </div>
             
-            <div className="flex-grow overflow-x-auto hide-scrollbar">
-              <div className="flex items-center bg-gray-200/50 backdrop-blur-md p-1 rounded-xl w-max mx-auto sm:mx-0 gap-1 border border-white/40 shadow-inner">
+            <div className="flex-grow overflow-x-auto hide-scrollbar -mr-2 sm:mr-0 pl-1">
+              <div className="flex items-center bg-gray-200/60 backdrop-blur-md p-1 rounded-xl w-max sm:mx-auto gap-0.5 sm:gap-1 border border-white/40 shadow-inner">
                 {navItems.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setActiveView(item.id as ViewType)}
-                    className={`relative px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap cursor-pointer hover:bg-white/60 ${
+                    className={`relative px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all duration-200 flex items-center gap-1 sm:gap-1.5 whitespace-nowrap cursor-pointer hover:bg-white/60 touch-manipulation ${
                       activeView === item.id ? `${item.color}` : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
                     {activeView === item.id && (
                       <span className="absolute inset-0 bg-white shadow-sm rounded-lg border border-white/50 pointer-events-none"></span>
                     )}
-                    <item.icon size={14} className="shrink-0 relative z-10" />
+                    <item.icon size={13} className="shrink-0 relative z-10 sm:w-3.5 sm:h-3.5" />
                     <span className="relative z-10">{item.label}</span>
                   </button>
                 ))}
@@ -167,14 +167,14 @@ function App() {
         </nav>
 
         {/* Ask AgriCompanion AI Sticky Ribbon */}
-        <div className="bg-emerald-950/90 backdrop-blur-lg border-b border-emerald-500/20 sticky top-16 z-30 shadow-[0_5px_20px_rgba(16,185,129,0.15)]">
-          <div className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center justify-between gap-3 text-xs">
+        <div className="bg-emerald-950/90 backdrop-blur-lg border-b border-emerald-500/20 sticky top-14 sm:top-16 z-30 shadow-[0_5px_20px_rgba(16,185,129,0.15)]">
+          <div className="max-w-[1500px] mx-auto px-3 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-3 text-xs">
             <div className="flex items-center gap-2 truncate">
               <div className="bg-emerald-500/20 p-1 rounded-md text-emerald-400 animate-pulse shrink-0 border border-emerald-500/30">
-                <Bot size={14} />
+                <Bot size={13} className="sm:w-3.5 sm:h-3.5" />
               </div>
               <span className="font-medium text-[11px] sm:text-xs truncate text-emerald-100 tracking-wide">
-                <strong className="text-emerald-400 font-bold tracking-wider uppercase text-[10px] mr-1 border border-emerald-500/30 px-1 py-0.5 rounded-sm bg-emerald-500/10">AI Alert</strong>
+                <strong className="text-emerald-400 font-bold tracking-wider uppercase text-[10px] mr-1 border border-emerald-500/30 px-1 py-0.5 rounded-sm bg-emerald-500/10 hidden xs:inline">AI Alert</strong>
                 Access FMAFS Renewed Hope fertilizer grants & BOA grain stabilisation plans!
               </span>
             </div>
@@ -182,7 +182,7 @@ function App() {
               onClick={() => {
                 window.dispatchEvent(new CustomEvent("open-agrichatbot"));
               }}
-              className="shrink-0 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold px-3 py-1.5 rounded-lg text-[10px] sm:text-xs transition-all shadow-[0_0_10px_rgba(16,185,129,0.4)] cursor-pointer flex items-center gap-1.5 border border-emerald-400/50"
+              className="shrink-0 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs transition-all shadow-[0_0_10px_rgba(16,185,129,0.4)] cursor-pointer flex items-center gap-1 sm:gap-1.5 border border-emerald-400/50 touch-manipulation"
             >
               <Sparkles size={11} className="shrink-0" />
               <span>Ask AI</span>
@@ -190,8 +190,8 @@ function App() {
           </div>
         </div>
 
-        <main className="flex-grow p-2 sm:p-4 lg:p-6 relative z-10">
-          <div className="bg-white/80 backdrop-blur-2xl border border-white/50 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden">
+        <main className="flex-grow p-2 sm:p-4 lg:p-6 relative z-10 w-full max-w-[1600px] mx-auto">
+          <div className="bg-white/80 backdrop-blur-2xl border border-white/50 rounded-2xl sm:rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden w-full">
             {activeView === 'farmer' && (
               <FarmersDashboard 
                  onAddListing={handleAddListing} 

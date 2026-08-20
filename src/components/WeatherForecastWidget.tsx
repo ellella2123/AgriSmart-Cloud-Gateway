@@ -371,11 +371,11 @@ export default function WeatherForecastWidget({
                 </div>
 
                 {/* Filter Chips */}
-                <div className="flex items-center gap-1 bg-gray-100/80 p-1 rounded-xl text-[11px] font-semibold">
+                <div className="flex flex-wrap items-center gap-1 bg-gray-100/80 p-1 rounded-xl text-[11px] font-semibold">
                   <button
                     onClick={() => setActiveAlertFilter("all")}
                     className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                      activeAlertFilter === "all" ? "bg-white text-gray-900 shadow-xs" : "text-gray-500 hover:text-gray-800"
+                      activeAlertFilter === "all" ? "bg-white text-gray-900 shadow-xs font-bold" : "text-gray-500 hover:text-gray-800"
                     }`}
                   >
                     All ({forecast.alerts.length})
@@ -383,26 +383,26 @@ export default function WeatherForecastWidget({
                   <button
                     onClick={() => setActiveAlertFilter("temperature")}
                     className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                      activeAlertFilter === "temperature" ? "bg-white text-gray-900 shadow-xs" : "text-gray-500 hover:text-gray-800"
+                      activeAlertFilter === "temperature" ? "bg-white text-gray-900 shadow-xs font-bold" : "text-gray-500 hover:text-gray-800"
                     }`}
                   >
-                    🌡️ Temperature
+                    🌡️ Temp
                   </button>
                   <button
                     onClick={() => setActiveAlertFilter("precipitation")}
                     className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                      activeAlertFilter === "precipitation" ? "bg-white text-gray-900 shadow-xs" : "text-gray-500 hover:text-gray-800"
+                      activeAlertFilter === "precipitation" ? "bg-white text-gray-900 shadow-xs font-bold" : "text-gray-500 hover:text-gray-800"
                     }`}
                   >
-                    🌧️ Precipitation
+                    🌧️ Rain
                   </button>
                   <button
                     onClick={() => setActiveAlertFilter("wind")}
                     className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                      activeAlertFilter === "wind" ? "bg-white text-gray-900 shadow-xs" : "text-gray-500 hover:text-gray-800"
+                      activeAlertFilter === "wind" ? "bg-white text-gray-900 shadow-xs font-bold" : "text-gray-500 hover:text-gray-800"
                     }`}
                   >
-                    💨 Wind & Spray
+                    💨 Wind
                   </button>
                 </div>
               </div>
@@ -464,19 +464,19 @@ export default function WeatherForecastWidget({
           {/* 3. FIVE-DAY DETAILED CARDS CAROUSEL / GRID */}
           {forecast && (
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                 <div className="flex items-center gap-2">
-                  <CalendarDays size={18} className="text-emerald-700" />
+                  <CalendarDays size={18} className="text-emerald-700 shrink-0" />
                   <h3 className="text-sm font-bold text-gray-900 tracking-tight">
                     5-Day Agricultural Weather Outlook
                   </h3>
                 </div>
-                <span className="text-xs text-gray-500">
+                <span className="text-[11px] sm:text-xs text-gray-500">
                   Click any day for precision agronomy & spraying advice
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
                 {forecast.daily.map((day, idx) => {
                   const isSelected = selectedDayIndex === idx;
                   const rainPercentage = day.precipitationProbability;

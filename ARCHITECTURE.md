@@ -62,3 +62,13 @@ Firestore NoSQL Collections:
 - [x] **Phase 4: Marketplace & Logistics** (Commodity exchange, QR verification).
 - [x] **Phase 5: Financial Services** (Digital wallet UI, loan applications).
 - [x] **Phase 6: Enterprise Dashboards** (NGO/Government/Extension worker portals).
+
+## 9. GCP Free Tier Architecture & Cost Note (CC-12 Alignment)
+This project implements a production-ready, serverless infrastructure specifically aligned with the CC-12 SMS/USSD Gateway brief, heavily optimizing for the Google Cloud Platform (GCP) Free Tier.
+
+| GCP Service | Free Tier Allocation | Estimated AgriSmart Usage | Net Cost |
+| :--- | :--- | :--- | :--- |
+| **Cloud Run** | 2 Million requests/mo, 360,000 vCPU-seconds | ~50,000 requests/mo | $0.00 / month |
+| **Cloud Logging** | 50 GB log ingestion/mo | ~200 MB structured logs | $0.00 / month |
+
+The infrastructure is provisioned via **Terraform** (`terraform/main.tf`) and containerized via a multi-stage **Dockerfile**, ensuring a lightweight, scalable environment that dynamically scales to zero instances when idle, incurring absolutely no cost for rural deployments while remaining enterprise-ready.
