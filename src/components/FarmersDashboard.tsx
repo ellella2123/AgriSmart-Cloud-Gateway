@@ -5,7 +5,7 @@ import {
   Image as ImageIcon, Plus, Loader2, Sparkles, 
   MapPin, CloudSun, AlertCircle, User, Landmark, Tag,
   Smartphone, Bluetooth, Camera, Cpu, MessageSquare, Phone, Activity, Zap, Radio,
-  TrendingUp, DollarSign, Scale, ArrowUpRight, ShoppingBag
+  TrendingUp, DollarSign, Scale, ArrowUpRight, ShoppingBag, X
 } from "lucide-react";
 import { Certificate, SoilDiagnosis } from "../types";
 import AgriculturalMap from "./AgriculturalMap";
@@ -54,7 +54,7 @@ export default function FarmersDashboard({ onAddListing, certificates, onRefresh
   const { fetchTelemetry } = useSatelliteTelemetry();
 
   // General State
-  const [activeTab, setActiveTab] = useState<"assess" | "weather" | "prices" | "diagnose" | "list">("assess");
+  const [activeTab, setActiveTab] = useState<"none" | "assess" | "weather" | "prices" | "diagnose" | "list">("none");
 
   // Tab 1: Assess Suitability State
   const [location, setLocation] = useState("");
@@ -448,6 +448,8 @@ Soil Suitability: [Comment about suitability]`;
   };
 
   // --- NEW: Retro Feature Phone keypad and system handlers ---
+  const [multiTap, setMultiTap] = useState<{ key: string; index: number; time: number } | null>(null);
+
   const handleRetroKeyPress = (key: string) => {
     if (retroPhoneState === "idle") {
       setRetroPhoneState("dialing");
@@ -456,6 +458,33 @@ Soil Suitability: [Comment about suitability]`;
       setRetroDialed(prev => prev + key);
     } else if (retroPhoneState === "ussd") {
       setUssdInput(prev => prev + key);
+    } else if (retroPhoneState === "sms_compose") {
+      const T9_MAP: Record<string, string[]> = {
+        "1": ["1", ".", ",", "!", "?"],
+        "2": ["A", "B", "C", "2", "a", "b", "c"],
+        "3": ["D", "E", "F", "3", "d", "e", "f"],
+        "4": ["G", "H", "I", "4", "g", "h", "i"],
+        "5": ["J", "K", "L", "5", "j", "k", "l"],
+        "6": ["M", "N", "O", "6", "m", "n", "o"],
+        "7": ["P", "Q", "R", "S", "7", "p", "q", "r", "s"],
+        "8": ["T", "U", "V", "8", "t", "u", "v"],
+        "9": ["W", "X", "Y", "Z", "9", "w", "x", "y", "z"],
+        "0": [" ", "0"],
+        "*": ["*"],
+        "#": ["#"],
+      };
+
+      const now = Date.now();
+      if (multiTap && multiTap.key === key && now - multiTap.time < 1000) {
+        const chars = T9_MAP[key] || [key];
+        const nextIndex = (multiTap.index + 1) % chars.length;
+        setMultiTap({ key, index: nextIndex, time: now });
+        setSmsText(prev => prev.slice(0, -1) + chars[nextIndex]);
+      } else {
+        const chars = T9_MAP[key] || [key];
+        setMultiTap({ key, index: 0, time: now });
+        setSmsText(prev => prev + chars[0]);
+      }
     }
   };
 
@@ -469,6 +498,8 @@ Soil Suitability: [Comment about suitability]`;
       }
     } else if (retroPhoneState === "ussd") {
       setUssdInput(prev => prev.slice(0, -1));
+    } else if (retroPhoneState === "sms_compose") {
+      setSmsText(prev => prev.slice(0, -1));
     }
   };
 
@@ -944,46 +975,40 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
             Optimize, Assess & Showcase Your Harvest
           </h1>
           <p className="text-emerald-100/90 leading-relaxed text-xs sm:text-sm md:text-base font-medium max-w-2xl">
-            Verify soil fertility, search current climate conditions globally to secure financial micro-loans, diagnose visual crop diseases instantly, and generate premium AI assets to sell to global wholesale buyers.
+            Verify soil fertility, search current climate conditions globally to secure financial micro-loans, diagnose visual crop diseases instantly, and generate high quality agricultural products to sell to global wholesale buyers.
           </p>
         </div>
       </div>
 
-      {/* Internal Navigation Tabs */}
-      <div className="flex bg-white/60 backdrop-blur-xl border border-gray-200/60 p-1 sm:p-1.5 rounded-xl sm:rounded-2xl w-full sm:w-fit overflow-x-auto hide-scrollbar sm:flex-wrap gap-1 shadow-sm" id="farmer-dash-tabs">
+      {/* Feature Navigation Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-6 mb-8 w-full" id="farmer-dash-tabs">
         {[
-          { id: "assess", icon: FileText, label: "Land & Climate Assessment" },
-          { id: "weather", icon: CloudSun, label: "5-Day Agro-Weather" },
-          { id: "prices", icon: TrendingUp, label: "Live Crop Prices" },
-          { id: "diagnose", icon: UploadCloud, label: "Visual Diagnostics" },
-          { id: "list", icon: Plus, label: "Smart Listing" },
-        ].map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id as any);
-                if (tab.id === "prices" && !priceData) {
-                  handleFetchCropPrice(cropName || "Maize", location || "Kano, Nigeria");
-                }
-              }}
-              className={`relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-colors duration-200 cursor-pointer whitespace-nowrap shrink-0 sm:shrink ${
-                isActive ? "text-emerald-900 font-bold" : "text-gray-500 hover:text-gray-800 hover:bg-gray-100/50"
-              }`}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="activeTabIndicator"
-                  className="absolute inset-0 bg-white rounded-lg sm:rounded-xl shadow-md border border-gray-200/50"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              <tab.icon size={15} className="relative z-10 sm:w-4 sm:h-4" />
-              <span className="relative z-10">{tab.label}</span>
-            </button>
-          );
-        })}
+          { id: "assess", icon: FileText, label: "Land & Climate Assessment", color: "bg-emerald-100 text-emerald-700" },
+          { id: "weather", icon: CloudSun, label: "5-Day Agro-Weather", color: "bg-sky-100 text-sky-700" },
+          { id: "prices", icon: TrendingUp, label: "Live Crop Prices", color: "bg-amber-100 text-amber-700" },
+          { id: "diagnose", icon: UploadCloud, label: "Visual Diagnostics", color: "bg-purple-100 text-purple-700" },
+          { id: "list", icon: Plus, label: "Smart Listing", color: "bg-rose-100 text-rose-700" },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => {
+              setActiveTab(tab.id as any);
+              const el = document.getElementById("section-" + tab.id);
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+              if (tab.id === "prices" && !priceData) {
+                handleFetchCropPrice(cropName || "Maize", location || "Kano, Nigeria");
+              }
+            }}
+            className="flex flex-col items-center justify-center p-4 sm:p-5 bg-gradient-to-br from-white/80 to-emerald-50/40 backdrop-blur-xl border border-white/60 hover:bg-gradient-to-br hover:from-white hover:to-emerald-50/60 hover:scale-[1.03] hover:shadow-[0_16px_40px_rgba(16,185,129,0.2)] transition-all duration-300 rounded-[2rem] shadow-[0_8px_30px_rgba(16,185,129,0.06)] cursor-pointer group text-center gap-3"
+          >
+             <div className={`p-4 rounded-2xl ${tab.color} group-hover:scale-110 transition-transform`}>
+               <tab.icon size={28} strokeWidth={2.5} />
+             </div>
+             <span className="font-extrabold text-gray-800 text-[11px] sm:text-xs uppercase tracking-wider">{tab.label}</span>
+          </button>
+        ))}
       </div>
 
       {/* HARDWARE SENSOR ACTIVE INDICATOR */}
@@ -1009,10 +1034,10 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
         }}
       />
 
-      <AnimatePresence mode="wait">
+      <div className="flex flex-col gap-12 mt-8">
       {/* --- TAB: DEDICATED 5-DAY AGRO-WEATHER & PRECISION ALERTS (WHEN CLICKED) --- */}
-      {activeTab === "weather" && (
-        <motion.div key="weather" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }} className="space-y-6" id="section-weather-tab">
+      {true && (
+        <motion.div key="weather" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }} className="space-y-6 scroll-mt-32" id="section-weather">
           <div className="bg-emerald-900/10 border border-emerald-800/20 rounded-2xl p-4 flex items-center gap-3">
             <CloudSun className="text-emerald-700 shrink-0" size={24} />
             <div className="text-xs text-emerald-950">
@@ -1023,16 +1048,16 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
       )}
 
       {/* --- TAB: DEDICATED LIVE LOCAL CROP MARKET PRICES (LOCATION SPECIFIC) --- */}
-      {activeTab === "prices" && (
-        <motion.div key="prices" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }} className="space-y-6" id="section-prices-tab">
-          <div className="bg-white/80 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] space-y-6 hover:shadow-[0_8px_40px_rgba(16,185,129,0.08)] transition-shadow duration-500">
+      {true && (
+        <motion.div key="prices" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }} className="space-y-6 scroll-mt-32" id="section-prices">
+          <div className="bg-gradient-to-br from-white/95 to-emerald-50/50 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 border border-white/60 shadow-[0_12px_40px_rgba(0,0,0,0.06)] space-y-6 hover:shadow-[0_16px_50px_rgba(16,185,129,0.15)] transition-all duration-500 hover:scale-[1.01]">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-5">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="p-2 rounded-xl bg-emerald-100 text-emerald-800">
                     <TrendingUp size={22} />
                   </span>
-                  <h2 className="text-xl font-extrabold text-gray-900">
+                  <h2 className="text-xl font-black text-gray-900 drop-shadow-sm">
                     Live Location-Specific Crop Market Prices & Exchange Hubs
                   </h2>
                 </div>
@@ -1134,7 +1159,7 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
             ) : priceData ? (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-emerald-50/70 border border-emerald-200/80 p-4.5 rounded-2xl">
+                  <div className="bg-gradient-to-br from-emerald-50/80 to-teal-50/40 border border-emerald-200/60 p-4.5 rounded-2xl shadow-sm hover:shadow-[0_8px_24px_rgba(16,185,129,0.15)] hover:scale-[1.02] transition-all duration-300">
                     <div className="flex justify-between items-center text-xs text-emerald-900 font-bold mb-1">
                       <span>Wholesale Spot Rate</span>
                       <DollarSign size={16} className="text-emerald-700" />
@@ -1147,12 +1172,12 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 border border-gray-200 p-4.5 rounded-2xl">
+                  <div className="bg-gradient-to-br from-slate-50 to-white border border-gray-200/80 p-4.5 rounded-2xl shadow-sm hover:shadow-[0_8px_24px_rgba(16,185,129,0.12)] hover:scale-[1.02] transition-all duration-300">
                     <div className="flex justify-between items-center text-xs text-gray-600 font-bold mb-1">
                       <span>100kg Bag Price</span>
                       <ShoppingBag size={16} className="text-gray-500" />
                     </div>
-                    <div className="text-2xl font-extrabold text-gray-900">
+                    <div className="text-2xl font-black text-emerald-950 drop-shadow-sm">
                       {priceData.bagPrice100kg}
                     </div>
                     <div className="text-[11px] text-gray-500 mt-1">
@@ -1160,12 +1185,12 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 border border-gray-200 p-4.5 rounded-2xl">
+                  <div className="bg-gradient-to-br from-slate-50 to-white border border-gray-200/80 p-4.5 rounded-2xl shadow-sm hover:shadow-[0_8px_24px_rgba(16,185,129,0.12)] hover:scale-[1.02] transition-all duration-300">
                     <div className="flex justify-between items-center text-xs text-gray-600 font-bold mb-1">
                       <span>Metric Ton (MT) Rate</span>
                       <Scale size={16} className="text-gray-500" />
                     </div>
-                    <div className="text-2xl font-extrabold text-gray-900">
+                    <div className="text-2xl font-black text-emerald-950 drop-shadow-sm">
                       {priceData.metricTonPrice}
                     </div>
                     <div className="text-[11px] text-gray-500 mt-1">
@@ -1202,7 +1227,7 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
 
                   <div className="p-4 rounded-2xl border border-gray-150 bg-white shadow-2xs space-y-1">
                     <span className="text-[10px] font-extrabold uppercase text-gray-400">Nearest Physical Hub</span>
-                    <div className="text-sm font-bold text-gray-900 flex items-center gap-1">
+                    <div className="text-sm font-extrabold text-emerald-950 drop-shadow-sm flex items-center gap-1">
                       <MapPin size={14} className="text-emerald-700 shrink-0" />
                       <span className="truncate">{priceData.nearestExchangeHub}</span>
                     </div>
@@ -1258,13 +1283,13 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
       )}
 
       {/* --- TAB 1: LAND & CLIMATE ASSESSMENT --- */}
-      {activeTab === "assess" && (
+      {true && (
         <motion.div key="assess" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }} className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8" id="section-assess">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 scroll-mt-32" id="section-assess">
           {/* Left Form Column */}
-          <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-gray-100 shadow-xs space-y-6">
+          <div className="lg:col-span-5 bg-gradient-to-br from-white/95 to-emerald-50/20 p-6 rounded-2xl border border-white/60 shadow-[0_8px_24px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_36px_rgba(16,185,129,0.12)] hover:-translate-y-0.5 transition-all duration-300 space-y-6">
             <div>
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <h2 className="text-lg font-extrabold text-emerald-950 drop-shadow-sm flex items-center gap-2">
                 <Sprout className="text-emerald-700" size={20} />
                 Suitability Assessor
               </h2>
@@ -1410,7 +1435,7 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
           {/* Right Certificate Column */}
           <div className="lg:col-span-7 flex flex-col justify-between">
             {assessmentResult ? (
-              <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 shadow-md p-4 sm:p-6 relative overflow-hidden flex flex-col h-full animate-in fade-in zoom-in-95 duration-200">
+              <div className="bg-gradient-to-br from-white/95 to-emerald-50/30 rounded-2xl sm:rounded-3xl border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_40px_rgba(16,185,129,0.15)] hover:scale-[1.01] transition-all duration-300 p-4 sm:p-6 relative overflow-hidden flex flex-col h-full animate-in fade-in zoom-in-95 duration-200">
                 {/* Visual Accent */}
                 <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-bl-full pointer-events-none"></div>
 
@@ -1422,7 +1447,7 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
                         Official Agri-Certificate
                       </span>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-extrabold text-gray-900 tracking-tight">
+                    <h3 className="text-lg sm:text-xl font-black text-gray-900 drop-shadow-sm tracking-tight">
                       Land Fertility & Climate Suitability
                     </h3>
                     <p className="text-xs text-gray-400 font-mono">ID: {assessmentResult.certificate.id}</p>
@@ -1540,10 +1565,10 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
       )}
 
       {/* --- TAB 2: UNIVERSAL MULTI-TECH SOIL DIAGNOSTIC HUB --- */}
-      {activeTab === "diagnose" && (
-        <motion.div key="diagnose" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }} className="space-y-6" id="section-diagnose">
+      {true && (
+        <motion.div key="diagnose" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }} className="space-y-6 scroll-mt-32" id="section-diagnose">
           {/* Diagnostic Profile Selector */}
-          <div className="bg-white/80 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="bg-gradient-to-br from-white/95 to-emerald-50/50 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 border border-white/60 shadow-[0_12px_40px_rgba(0,0,0,0.06)] flex flex-col md:flex-row items-center justify-between gap-4 hover:shadow-[0_16px_50px_rgba(16,185,129,0.15)] transition-all duration-500 hover:scale-[1.01]">
             <div>
               <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
                 <Cpu className="text-emerald-700 animate-pulse" size={24} />
@@ -1587,7 +1612,7 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
           {phoneProfile === "smart" && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Left Column: Smart Tool Navigation and Input */}
-              <div className="lg:col-span-5 bg-white p-6 rounded-3xl border border-gray-100 shadow-xs space-y-6">
+              <div className="lg:col-span-5 bg-gradient-to-br from-white/95 to-emerald-50/20 p-6 rounded-3xl border border-white/60 shadow-[0_8px_24px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_36px_rgba(16,185,129,0.12)] hover:-translate-y-0.5 transition-all duration-300 space-y-6">
                 <div>
                   <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">SMARTPHONE DIAGNOSTICS</h3>
                   <div className="flex border-b border-gray-100 bg-gray-50 p-1 rounded-xl mt-2.5">
@@ -2006,13 +2031,13 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
                 {smartSubTab === "camera" && (
                   <>
                     {diagnosisResult ? (
-                      <div className="bg-white rounded-3xl border border-gray-100 shadow-md p-6 space-y-5 animate-in fade-in zoom-in-95 duration-200 text-left">
+                      <div className="bg-gradient-to-br from-white/95 to-emerald-50/30 rounded-3xl border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_40px_rgba(16,185,129,0.15)] hover:-translate-y-1 transition-all duration-300 p-6 space-y-5 animate-in fade-in zoom-in-95 duration-200 text-left">
                         <div className="flex items-center justify-between border-b border-gray-100 pb-4">
                           <div>
                             <span className="text-[9px] font-mono uppercase bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-md font-bold tracking-wider">
                               VISUAL SPECTRAL REPORT
                             </span>
-                            <h3 className="text-lg font-bold text-gray-900 mt-1">Diagnosis: {diagnosisResult.diagnosis}</h3>
+                            <h3 className="text-lg font-extrabold text-emerald-950 drop-shadow-sm mt-1">Diagnosis: {diagnosisResult.diagnosis}</h3>
                           </div>
                           <div className="text-right">
                             <span className="text-[9px] text-gray-400 block uppercase">Confidence Score</span>
@@ -2079,7 +2104,7 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
                 {smartSubTab === "bluetooth" && (
                   <div className="h-full">
                     {probeAnalysis ? (
-                      <div className="bg-white rounded-3xl border border-gray-100 shadow-md p-6 text-left space-y-4 h-full animate-in fade-in duration-200">
+                      <div className="bg-gradient-to-br from-white/95 to-emerald-50/30 rounded-3xl border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_40px_rgba(16,185,129,0.15)] hover:-translate-y-1 transition-all duration-300 p-6 text-left space-y-4 h-full animate-in fade-in duration-200">
                         <div className="border-b border-gray-100 pb-3">
                           <span className="text-[9px] font-mono bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded uppercase font-bold">IOT TELEMETRY DECRYPTION</span>
                           <h3 className="text-base font-bold text-gray-800 mt-1">Gemini AI BLE Sensor Consultation</h3>
@@ -2103,7 +2128,7 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
                 {smartSubTab === "infrared" && (
                   <div className="h-full">
                     {infraredAnalysis ? (
-                      <div className="bg-white rounded-3xl border border-gray-100 shadow-md p-6 text-left space-y-4 h-full animate-in fade-in duration-200">
+                      <div className="bg-gradient-to-br from-white/95 to-emerald-50/30 rounded-3xl border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_40px_rgba(16,185,129,0.15)] hover:-translate-y-1 transition-all duration-300 p-6 text-left space-y-4 h-full animate-in fade-in duration-200">
                         <div className="border-b border-gray-100 pb-3">
                           <span className="text-[9px] font-mono bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded uppercase font-bold">NIR REFLECTANCE SUMMARY</span>
                           <h3 className="text-base font-bold text-indigo-950 mt-1">Spectroscopy Soil Quality Report</h3>
@@ -2366,7 +2391,7 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
 
               {/* Right Column: Feature Phone Instruction Guide & Simulation Logs */}
               <div className="lg:col-span-7 space-y-6">
-                <div className="bg-white rounded-3xl border border-gray-100 shadow-md p-6 text-left space-y-5">
+                <div className="bg-gradient-to-br from-white/95 to-emerald-50/30 rounded-3xl border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_40px_rgba(16,185,129,0.15)] hover:-translate-y-1 transition-all duration-300 p-6 text-left space-y-5">
                   <div className="border-b border-gray-150 pb-4">
                     <span className="text-[9px] font-mono bg-amber-50 text-amber-800 px-2.5 py-0.5 rounded-md font-bold tracking-wider">
                       OFFLINE AGRICULTURAL SIMULATOR
@@ -2438,12 +2463,12 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
       )}
 
       {/* --- TAB 3: SMART LISTING AND AI IMAGING --- */}
-      {activeTab === "list" && (
-        <motion.div key="list" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }} className="grid grid-cols-1 lg:grid-cols-12 gap-8" id="section-list">
+      {true && (
+        <motion.div key="list" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }} className="grid grid-cols-1 lg:grid-cols-12 gap-8 scroll-mt-32" id="section-list">
           {/* Crop lister form */}
-          <div className="lg:col-span-7 bg-white/80 backdrop-blur-md p-6 rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgba(16,185,129,0.08)] transition-shadow duration-500">
+          <div className="lg:col-span-7 bg-gradient-to-br from-white/95 to-emerald-50/50 backdrop-blur-md p-6 rounded-[2rem] border border-white/60 shadow-[0_12px_40px_rgba(0,0,0,0.06)] hover:shadow-[0_16px_50px_rgba(16,185,129,0.15)] transition-all duration-500 hover:scale-[1.01]">
             <div className="mb-6">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <h2 className="text-lg font-extrabold text-emerald-950 drop-shadow-sm flex items-center gap-2">
                 <Tag className="text-emerald-700" size={20} />
                 Create Premium Harvest Listing
               </h2>
@@ -2778,7 +2803,7 @@ const getHardwareTelemetryContext = async (): Promise<string> => {
           </div>
         </motion.div>
       )}
-      </AnimatePresence>
+      </div>
     </div>
   );
 }

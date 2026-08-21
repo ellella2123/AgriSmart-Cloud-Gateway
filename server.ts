@@ -218,7 +218,8 @@ async function startServer() {
           },
           body: JSON.stringify({
             model: "google/gemini-2.5-flash",
-            messages: orMessages
+            messages: orMessages,
+            max_tokens: 2000
           })
         });
 

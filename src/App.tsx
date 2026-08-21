@@ -133,7 +133,7 @@ function App() {
       
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* Top Navigation */}
-        <nav className="bg-white/85 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+        <nav className="bg-gradient-to-r from-white/95 to-emerald-50/90 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
           <div className="max-w-[1500px] mx-auto px-2 sm:px-4 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2 shrink-0">
               <div className="bg-gradient-to-br from-emerald-400 to-emerald-600 p-1.5 rounded-lg text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]">
@@ -191,7 +191,7 @@ function App() {
         </div>
 
         <main className="flex-grow p-2 sm:p-4 lg:p-6 relative z-10 w-full max-w-[1600px] mx-auto">
-          <div className="bg-white/80 backdrop-blur-2xl border border-white/50 rounded-2xl sm:rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden w-full">
+          <div className="bg-gradient-to-br from-white/90 via-white/80 to-emerald-50/40 backdrop-blur-2xl shadow-[0_0_40px_rgba(16,185,129,0.15)] ring-1 ring-white/60 border border-white/50 rounded-2xl sm:rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden w-full">
             {activeView === 'farmer' && (
               <FarmersDashboard 
                  onAddListing={handleAddListing} 
